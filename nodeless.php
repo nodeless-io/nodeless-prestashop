@@ -11,6 +11,7 @@ if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
 require_once __DIR__ . '/vendor/autoload.php';
 
 use NodelessIO\Prestashop\Constants;
+use NodelessIO\Prestashop\NodelessApi;
 
 /** @noinspection AutoloadingIssuesInspection */
 
@@ -191,8 +192,9 @@ class Nodeless extends PaymentModule
                         'type' => 'text',
                         'prefix' => '<i class="icon icon-lock"></i>',
                         'desc' => $this->l('When saving the settings the webhook will get created automatically for you.'),
-                        'name' => Constants::WEBHOOK_SECRET,
-                        'label' => $this->l('Webhook Secret'),
+                        'name' => Constants::WEBHOOK_ID,
+                        'label' => $this->l('Webhook ID'),
+                        'readonly' => true,
                     ],
                 ],
                 'submit' => [
@@ -211,7 +213,7 @@ class Nodeless extends PaymentModule
             Constants::LIVE_MODE => Configuration::get(Constants::LIVE_MODE, null),
             Constants::STORE_ID => Configuration::get(Constants::STORE_ID, null),
             Constants::API_KEY => Configuration::get(Constants::API_KEY, null),
-            Constants::WEBHOOK_SECRET => Configuration::get(Constants::WEBHOOK_SECRET, null),
+            Constants::WEBHOOK_ID => Configuration::get(Constants::WEBHOOK_ID, null),
         ];
     }
 
@@ -223,10 +225,14 @@ class Nodeless extends PaymentModule
         $form_values = $this->getConfigFormValues();
 
         foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
+            // Update all values but webhook id as it gets set in ensureWebhook() if needed.
+            if ($key !== Constants::WEBHOOK_ID) {
+                Configuration::updateValue($key, Tools::getValue($key));
+            }
         }
 
-        $this->ensureWebhook()
+        $nlApi = new NodelessApi();
+        $nlApi->ensureWebhook();
     }
 
     /**

@@ -8,6 +8,7 @@ class Constants
     public const API_KEY = 'NODELESS_API_KEY';
     public const STORE_ID = 'NODELESS_STORE_ID';
     public const WEBHOOK_SECRET = 'NODELESS_WEBHOOK_SECRET';
+    public const WEBHOOK_ID = 'NODELESS_WEBHOOK_ID';
     public const LIVE_MODE = 'NODELESS_LIVE_MODE';
     public const HOST_PRODUCTION = 'https://nodeless.io';
     public const HOST_TESTNET = 'https://testnet.nodeless.io';
@@ -22,5 +23,16 @@ class Constants
     public const ORDER_STATE_IN_FLIGHT = 'NODELESS_OS_IN_FLIGHT';
     public const ORDER_STATE_EXPIRED = 'NODELESS_OS_EXPIRED';
     public const ORDER_STATE_CANCELLED = 'NODELESS_OS_CANCELLED';
+
+    // Webhook events.
+    public const WEBHOOK_EVENTS = [
+        'pending_confirmation',
+        'paid',
+        'expired',
+        'cancelled',
+        'underpaid',
+        'overpaid',
+        'in_flight'
+    ];
 
 }
