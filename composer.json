@@ -1,0 +1,23 @@
+{
+  "name": "nodeless-io/nodeless-prestashop",
+  "description": "Prestashop payment module.",
+  "type": "project",
+  "require": {
+    "nodeless-io/nodeless-php": "^0.0.1"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "NodelessIO\\Prestashop\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "ndeet",
+      "email": "andy.tasch@gmail.com"
+    }
+  ],
+  "config": {
+    "prepend-autoloader": false
+  }
+}
