@@ -4,43 +4,33 @@ namespace NodelessIO\Prestashop;
 
 class PaymentProcessor
 {
-    public const INVOICE_STATUS_NEW = 'new';
-    public const INVOICE_STATUS_PAID = 'paid';
-    public const INVOICE_STATUS_PENDING = 'pending_confirmation';
-    public const INVOICE_STATUS_EXPIRED = 'expired';
-    public const INVOICE_STATUS_CANCELLED = 'cancelled';
-    public const INVOICE_STATUS_UNDERPAID = 'underpaid';
-    public const INVOICE_STATUS_OVERPAID = 'overpaid';
-    public const INVOICE_STATUS_IN_FLIGHT = 'in_flight';
-
     public NodelessApi $api;
-    // Can't type hint this because PS does only pass the class without namespace for soem odd reason.
+    // Can't type hint this because PS does only pass the class without namespace for some odd reason.
     public $module;
+
+    public $configuration;
 
     public function __construct($module)
     {
         $this->api = new NodelessApi();
         $this->module = $module;
+        $this->configuration = new \Configuration();
     }
 
     // todo constructor logger etc
-    public function checkInvoiceStatus(PaymentModel $pm)
+    public function checkInvoiceStatus(\PaymentModel $pm): bool
     {
         // Get the invoice id and fetch latest data from nodeless.io
         if (!$invoiceId = $pm->getInvoiceId()) {
-            // todo: log
-            throw new \Exception('Could not find the invoice associated with that payment model id: ' . $pm->getId());
+            $errInvoice = 'Could not find the invoice associated with that payment model id: ' . $pm->getId();
+            \PrestaShopLogger::addLog($errInvoice, 3);
+            throw new \Exception($errInvoice);
         }
 
-        #try {
-            $this->updateOrderStatus($pm, $this->api->getInvoiceStatus($invoiceId));
-        #} catch (\Throwable $e) {
-            // todo: log
-        #    throw new \Exception('dannggg');
-        #}
+        return $this->updateOrderStatus($pm, $this->api->getInvoiceStatus($invoiceId));
     }
 
-    public function updateOrderStatus(PaymentModel $pm, string $status): bool
+    public function updateOrderStatus(\PaymentModel $pm, string $status): bool
     {
         // Log the received status.
         $updateOrderStatus = false;
@@ -48,54 +38,52 @@ class PaymentProcessor
         $orderStatus = null;
 
         switch ($status) {
-            case 'new':
-                //Logger::debug( __METHOD__ .  ': Invoice status still "new" doing nothing.' );
+            case Constants::INVOICE_STATUS_NEW:
                 break;
 
-            case 'pending_confirmation': // The invoice is paid in full.
+            case Constants::INVOICE_STATUS_PENDING:
                 $message = 'Invoice payment received fully, waiting for settlement.';
                 $updateOrderStatus = true;
-                $orderStatus = 1; // todo: id for pending
+                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_PENDING_CONFIRMATION);
                 break;
 
-            case 'paid':
+            case Constants::INVOICE_STATUS_PAID:
                 $message = 'Invoice fully paid and settled.';
                 $updateOrderStatus = true;
-                $orderStatus = 1; // todo: id for pending
+                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_PAID);
                 break;
 
-            case 'underpaid':
+            case Constants::INVOICE_STATUS_UNDERPAID:
                 $message = 'Invoice is underpaid. Needs manual checking.';
                 $updateOrderStatus = true;
-                $orderStatus = 1; // todo: id for underpaid
+                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_UNDERPAID);
                 break;
 
-            case 'overpaid':
+            case Constants::INVOICE_STATUS_OVERPAID:
                 $message = 'Invoice is overpaid. Needs manual checking.';
                 $updateOrderStatus = true;
-                $orderStatus = 1; // todo: id for overpaid
+                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_OVERPAID);
                 break;
 
-            case 'in_flight':
-                //Logger::debug( 'Invoice in flight.' );
-                //$this->updateWCOrderStatus( $order, $configuredOrderStates[ OrderStates::IN_FLIGHT ] );
-                //$order->add_order_note( __( 'Invoice is in flight. Eventually needs manual checking if no paid status follows.', 'nodeless-for-woocommerce' ) );
-                //$this->updateWCOrder( $order, $webhookData );
+            case Constants::INVOICE_STATUS_IN_FLIGHT:
                 $message = 'Invoice is in flight. Eventually needs manual checking if no paid status follows.';
                 $updateOrderStatus = true;
-                $orderStatus = 1; // todo: id for in flight
+                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_IN_FLIGHT);
                 break;
 
-            case 'expired':
+            case Constants::INVOICE_STATUS_EXPIRED:
+                // Not updating order status so the customer can retry with order still in cart.
+                // This will keep the order as cart only and not create an actual order; this is how PS handles orders.
                 $message = 'Invoice expired.';
-                #$updateOrderStatus = true; // not updating order status because customer can retry?
-                #$orderStatus = 1;
+                \PrestaShopLogger::addLog('Invoice expired, cart id: ' . $pm->getCartId(), 1);
+                $updateOrderStatus = false;
+                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_EXPIRED);
                 break;
 
-            case 'cancelled':
+            case Constants::INVOICE_STATUS_CANCELLED:
                 $message = 'Invoice was cancelled.';
                 $updateOrderStatus = true;
-                $orderStatus = 1; // todo: id for cancelled
+                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_CANCELLED);
                 break;
         }
 
@@ -106,7 +94,7 @@ class PaymentProcessor
         // Create the order if not available, yet.
         $order = \Order::getByCartId($pm->getCartId());
         if (!$order && $updateOrderStatus) {
-
+            // Create an order from cart.
             $this->module->validateOrder(
                 $pm->getCartId(),
                 $orderStatus,
@@ -119,24 +107,25 @@ class PaymentProcessor
                 $customer->secure_key
             );
 
-            // Load the order as it exists now.
+            // Load the order as it exists now, update payment model.
             $newOrder = \Order::getByCartId($pm->getCartId());
             $pm->setOrderId($newOrder->id);
             $pm->save();
 
             // Add order history.
-            #$orderHistory = new \OrderHistory();
-            #$orderHistory->id_order = $newOrder->id;
-            #$orderHistory->message = $message;
-            #$orderHistory->add();
+            $orderHistory = new \OrderHistory();
+            $orderHistory->id_order = $newOrder->id;
+            $orderHistory->changeIdOrderState($orderStatus, $newOrder);
+            $orderHistory->message = $message;
+            $orderHistory->add();
 
-        } else {
-            // Update existing order status.
+        } else { // Update existing order status.
             if ($updateOrderStatus) {
-                // Add order history.
+                // Add only order history and update status.
                 $orderHistory = new \OrderHistory();
                 $orderHistory->id_order = $order->id;
                 $orderHistory->changeIdOrderState($orderStatus, $order);
+                $orderHistory->message = $message;
                 $orderHistory->add();
             }
         }

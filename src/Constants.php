@@ -24,6 +24,16 @@ class Constants
     public const ORDER_STATE_EXPIRED = 'NODELESS_OS_EXPIRED';
     public const ORDER_STATE_CANCELLED = 'NODELESS_OS_CANCELLED';
 
+    // Invoice states.
+    public const INVOICE_STATUS_NEW = 'new';
+    public const INVOICE_STATUS_PAID = 'paid';
+    public const INVOICE_STATUS_PENDING = 'pending_confirmation';
+    public const INVOICE_STATUS_EXPIRED = 'expired';
+    public const INVOICE_STATUS_CANCELLED = 'cancelled';
+    public const INVOICE_STATUS_UNDERPAID = 'underpaid';
+    public const INVOICE_STATUS_OVERPAID = 'overpaid';
+    public const INVOICE_STATUS_IN_FLIGHT = 'in_flight';
+
     // Webhook events.
     public const WEBHOOK_EVENTS = [
         'pending_confirmation',

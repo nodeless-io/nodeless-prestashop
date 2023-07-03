@@ -12,6 +12,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use NodelessIO\Prestashop\Constants;
 use NodelessIO\Prestashop\NodelessApi;
+use NodelessIO\Prestashop\OrderStates;
 
 /** @noinspection AutoloadingIssuesInspection */
 
