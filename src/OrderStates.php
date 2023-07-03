@@ -20,7 +20,7 @@ class OrderStates
     public function __construct(string $moduleName)
     {
         $this->moduleName = $moduleName;
-        $this->configuration = new Configuration();
+        $this->configuration = new \Configuration();
     }
 
     /**
@@ -28,7 +28,7 @@ class OrderStates
      * @throws \PrestaShopException
      * @throws \Exception
      */
-    public function install(): array
+    public function install(): bool
     {
         $errors = [];
 
@@ -128,7 +128,11 @@ class OrderStates
             }
         }
 
-        return $errors;
+        foreach ($errors as $error) {
+            \PrestaShopLogger::addLog($error['key'], 3);
+        }
+
+        return empty($errors);
     }
 
     /**
@@ -312,15 +316,15 @@ class OrderStates
     {
         $order_state = new OrderState();
         $order_state->name = [];
-        $order_state->send_email = true;
+        $order_state->send_email = false;
         $order_state->template = 'payment_error';
-        $order_state->color = 'Orange';
+        $order_state->color = 'Grey';
         $order_state->logable = true;
         $order_state->unremovable = true;
         $order_state->module_name = $this->moduleName;
 
         foreach (Language::getLanguages(true, false, true) as $languageId) {
-            $order_state->name[$languageId] = 'Bitcoin transaction expired';
+            $order_state->name[$languageId] = 'Nodeless status: expired';
         }
 
         if (false === $order_state->add()) {
@@ -344,13 +348,13 @@ class OrderStates
         $order_state->name = [];
         $order_state->send_email = true;
         $order_state->template = 'payment_error';
-        $order_state->color = 'Red';
+        $order_state->color = '#ff0000';
         $order_state->logable = true;
         $order_state->unremovable = true;
         $order_state->module_name = $this->moduleName;
 
         foreach (Language::getLanguages(true, false, true) as $languageId) {
-            $order_state->name[$languageId] = 'Bitcoin transaction cancelled';
+            $order_state->name[$languageId] = 'Nodeless status: cancelled';
         }
 
         if (false === $order_state->add()) {

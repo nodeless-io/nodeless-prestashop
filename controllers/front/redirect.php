@@ -67,7 +67,7 @@ class NodelessRedirectModuleFrontController extends ModuleFrontController
             \Tools::redirect($invoice->getCheckoutLink());
         } catch (\Throwable $e) {
             // todo: log + redirect
-            die($e->getMessage());
+            \PrestaShopLogger::addLog($e->getMessage(), 3);
             \Tools::redirect('index.php?controller=order');
         }
     }

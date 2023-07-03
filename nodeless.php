@@ -52,7 +52,7 @@ class Nodeless extends PaymentModule
     public function install()
     {
         if (extension_loaded('curl') == false) {
-            $this->_errors[] = $this->l('You have to enable the cURL extension on your server to install this module');
+            $this->_errors[] = $this->trans('You have to enable the cURL extension on your server to install this module');
             return false;
         }
 
@@ -71,18 +71,14 @@ class Nodeless extends PaymentModule
             PRIMARY KEY (`id`)
         ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=UTF8;';
 
-        $orderStateErrors = (new OrderStates($this->name))->install();
-        if (!empty($orderStateErrors)) {
-            return $this->trans('Error installing order states.', [], 'Admin.Payment.Notification');
-        }
-
         return parent::install() &&
             \Db::getInstance()->execute($createTable) &&
             Configuration::updateValue(Constants::LIVE_MODE, true) &&
             $this->registerHook('displayHeader') &&
             $this->registerHook('displayBackOfficeHeader') &&
             $this->registerHook('paymentOptions') &&
-            $this->registerHook('displayPaymentReturn');
+            $this->registerHook('displayPaymentReturn') &&
+            (new OrderStates($this->name))->install();
     }
 
     public function uninstall()
