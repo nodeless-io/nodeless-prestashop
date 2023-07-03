@@ -2,10 +2,6 @@
 
 namespace NodelessIO\Prestashop;
 
-use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
-use NodelessIO\Prestashop\PaymentModel;
-use NodelessIO\Prestashop\Nodeless;
-
 class PaymentProcessor
 {
     public const INVOICE_STATUS_NEW = 'new';
@@ -33,7 +29,7 @@ class PaymentProcessor
         // Get the invoice id and fetch latest data from nodeless.io
         if (!$invoiceId = $pm->getInvoiceId()) {
             // todo: log
-            throw new \Exception('dannggg');
+            throw new \Exception('Could not find the invoice associated with that payment model id: ' . $pm->getId());
         }
 
         #try {
@@ -42,11 +38,6 @@ class PaymentProcessor
             // todo: log
         #    throw new \Exception('dannggg');
         #}
-    }
-
-    public function processWebhook(PaymentModel $pm, \stdClass $webhookData): bool
-    {
-        // todo
     }
 
     public function updateOrderStatus(PaymentModel $pm, string $status): bool
@@ -134,7 +125,7 @@ class PaymentProcessor
             $pm->save();
 
             // Add order history.
-            #$orderHistory = new OrderHistory();
+            #$orderHistory = new \OrderHistory();
             #$orderHistory->id_order = $newOrder->id;
             #$orderHistory->message = $message;
             #$orderHistory->add();
@@ -143,7 +134,7 @@ class PaymentProcessor
             // Update existing order status.
             if ($updateOrderStatus) {
                 // Add order history.
-                $orderHistory = new OrderHistory();
+                $orderHistory = new \OrderHistory();
                 $orderHistory->id_order = $order->id;
                 $orderHistory->changeIdOrderState($orderStatus, $order);
                 $orderHistory->add();

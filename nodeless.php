@@ -70,6 +70,11 @@ class Nodeless extends PaymentModule
             PRIMARY KEY (`id`)
         ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=UTF8;';
 
+        $orderStateErrors = (new OrderStates($this->name))->install();
+        if (!empty($orderStateErrors)) {
+            return $this->trans('Error installing order states.', [], 'Admin.Payment.Notification');
+        }
+
         return parent::install() &&
             \Db::getInstance()->execute($createTable) &&
             Configuration::updateValue(Constants::LIVE_MODE, true) &&
@@ -83,12 +88,15 @@ class Nodeless extends PaymentModule
     {
         $dropTable = "DROP TABLE IF EXISTS " . _DB_PREFIX_ . "nodeless_payment";
 
+        // todo: uninstall order states needed?
+
         return parent::uninstall() &&
             \Db::getInstance()->execute($dropTable) &&
             Configuration::deleteByName(Constants::LIVE_MODE) &&
             Configuration::deleteByName(Constants::STORE_ID) &&
             Configuration::deleteByName(Constants::API_KEY) &&
-            Configuration::deleteByName(Constants::WEBHOOK_SECRET);
+            Configuration::deleteByName(Constants::WEBHOOK_SECRET) &&
+            Configuration::deleteByName(Constants::WEBHOOK_ID);
     }
 
     /**

@@ -128,7 +128,6 @@ class NodelessApi
             } else {
                 // todo: log url mismatch
             }
-
         } catch (\Throwable $e) {
             // todo: log exception on fetching webhook
         }
@@ -139,7 +138,21 @@ class NodelessApi
     public function storeWebhookEndpointUrl(): string
     {
         $link = new \Link();
+
         return $link->getModuleLink('nodeless', 'webhook', [], true);
     }
 
+    public function validWebhookRequest(string $signature, string $requestData): bool
+    {
+        if (!empty($this->webhookSecret)) {
+            $expectedHeader = hash_hmac('sha256', $requestData, $this->webhookSecret);
+            PrestaShopLogger::addLog(__FUNCTION__ . ' Expected header: ' . $expectedHeader);
+
+            if ($expectedHeader === $signature) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

@@ -33,12 +33,6 @@ class NodelessRedirectModuleFrontController extends ModuleFrontController
         $customer = new Customer($cart->id_customer);
 
         $link = new Link();
-        /*
-        $redirectUrl = $link->getPageLink('order-confirmation', null, null, [
-            'id_cart' => $cart->id,
-            'id_module' => $this->module->id,
-            'key' => $customer->secure_key
-        ]);*/
 
         $redirectUrl = $link->getModuleLink("nodeless", "validation", [
             'cart_id' => $cart->id,
