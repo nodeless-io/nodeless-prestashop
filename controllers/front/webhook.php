@@ -56,8 +56,8 @@ class NodelessWebhookModuleFrontController extends ModuleFrontController
         }
 
         $rawPostData = file_get_contents('php://input');
-        PrestaShopLogger::addLog('Webhook data received: input: ' . print_r($rawPostData, true), 1);
-        PrestaShopLogger::addLog('Webhook headers: ' . print_r(getallheaders(), true), 1);
+        \PrestaShopLogger::addLog('Webhook data received: input: ' . print_r($rawPostData, true), 1);
+        \PrestaShopLogger::addLog('Webhook headers: ' . print_r(getallheaders(), true), 1);
 
         if ($rawPostData) {
             // Validate webhook request.
@@ -71,7 +71,7 @@ class NodelessWebhookModuleFrontController extends ModuleFrontController
 
             if (!isset($signature) || $this->api->validWebhookRequest($signature, $rawPostData)) {
                 $errValidation = 'Failed to validate signature of webhook request.';
-                PrestaShopLogger::addLog($errValidation);
+                \PrestaShopLogger::addLog($errValidation, 3);
                 throw new \RuntimeException($errValidation, $errValidation);
             }
         }
@@ -80,7 +80,7 @@ class NodelessWebhookModuleFrontController extends ModuleFrontController
 
         if (!isset($postData->uuid)) {
             $errInvoice = 'No Nodeless.io invoiceId provided, aborting.';
-            PrestaShopLogger::addLog($errInvoice, 3);
+            \PrestaShopLogger::addLog($errInvoice, 3);
             throw new \RuntimeException($errInvoice);
         }
 
@@ -92,13 +92,11 @@ class NodelessWebhookModuleFrontController extends ModuleFrontController
 
         /** @var PaymentModel $pm */
         $pm = $collection->getFirst();
+        \PrestaShopLogger::addLog('Loaded pm cart id: ' . $pm->getCartId(), 1);
 
-        // The order won't exist if we did not process any payment status yet.
-        $order = \Order::getByCartId($pm->getCartId());
-
-        // Update the order status if the current payment status is not "paid".
-        if (!$order || $pm->getStatus() !== 'paid') {
-            $this->processor->checkInvoiceStatus($pm);
+        // Update order status.
+        if (!$this->processor->checkInvoiceStatus($pm)) {
+            \PrestaShopLogger::addLog('Error processing the order update on webhook.', 3);
         }
 
         // The order should exist now. If not log.

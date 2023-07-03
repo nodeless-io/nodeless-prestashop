@@ -18,7 +18,7 @@ class PaymentProcessor
     }
 
     // todo constructor logger etc
-    public function checkInvoiceStatus(\PaymentModel $pm): bool
+    public function checkInvoiceStatus(PaymentModel $pm): bool
     {
         // Get the invoice id and fetch latest data from nodeless.io
         if (!$invoiceId = $pm->getInvoiceId()) {
@@ -30,7 +30,7 @@ class PaymentProcessor
         return $this->updateOrderStatus($pm, $this->api->getInvoiceStatus($invoiceId));
     }
 
-    public function updateOrderStatus(\PaymentModel $pm, string $status): bool
+    public function updateOrderStatus(PaymentModel $pm, string $status): bool
     {
         // Log the received status.
         $updateOrderStatus = false;
