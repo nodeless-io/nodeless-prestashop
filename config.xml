@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
-	<name>nodeless</name>
-	<displayName><![CDATA[Nodeless.io Payments]]></displayName>
-	<version><![CDATA[1.0.0]]></version>
-	<description><![CDATA[Accept Bitcoin and Lightning payments in your online store, charity or fundraiser, all without all the complexities of managing a lightning node. Get payments sent directly to your cold storage or lightning address.]]></description>
-	<author><![CDATA[Nodeless.io]]></author>
-	<tab><![CDATA[payments_gateways]]></tab>
-	<is_configurable>1</is_configurable>
-	<need_instance>1</need_instance>
+    <name>nodeless</name>
+    <displayName><![CDATA[Nodeless.io Payments]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Accept Bitcoin and Lightning payments in your online store, charity or fundraiser, all without all the complexities of managing a lightning node. Get payments sent directly to your cold storage or lightning address.]]></description>
+    <author><![CDATA[Nodeless.io]]></author>
+    <tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[Are you sure to uninstall Nodeless module, the Bitcoin payment option should be removed?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>1</need_instance>
 </module>

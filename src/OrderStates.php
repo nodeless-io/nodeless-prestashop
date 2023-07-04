@@ -4,6 +4,7 @@ namespace NodelessIO\Prestashop;
 
 use \Language;
 use \OrderState;
+use PrestaShop\PrestaShop\Adapter\Configuration;
 
 class OrderStates
 {
@@ -20,7 +21,7 @@ class OrderStates
     public function __construct(string $moduleName)
     {
         $this->moduleName = $moduleName;
-        $this->configuration = new \Configuration();
+        $this->configuration = new Configuration();
     }
 
     /**
@@ -215,7 +216,7 @@ class OrderStates
             return false;
         }
 
-        $this->installImage($order_state, 'os_bitcoin_paid.png');
+        $this->installImage($order_state, 'os_paid.png');
         $this->configuration->set(Constants::ORDER_STATE_PAID, (int)$order_state->id);
 
         return true;
@@ -247,7 +248,7 @@ class OrderStates
             return false;
         }
 
-        $this->installImage($order_state, 'os_bitcoin_paid.png');
+        $this->installImage($order_state, 'os_paid.png');
         $this->configuration->set(Constants::ORDER_STATE_OVERPAID, (int)$order_state->id);
 
         return true;
@@ -331,7 +332,7 @@ class OrderStates
             return false;
         }
 
-        $this->installImage($order_state, 'os_bitcoin_failed.png');
+        $this->installImage($order_state, 'os_failed.png');
         $this->configuration->set(Constants::ORDER_STATE_EXPIRED, (int)$order_state->id);
 
         return true;
@@ -361,7 +362,7 @@ class OrderStates
             return false;
         }
 
-        $this->installImage($order_state, 'os_bitcoin_failed.png');
+        $this->installImage($order_state, 'os_failed.png');
         $this->configuration->set(Constants::ORDER_STATE_CANCELLED, (int)$order_state->id);
 
         return true;
@@ -376,8 +377,35 @@ class OrderStates
      */
     private function installImage(OrderState $order_state, string $image_name): void
     {
-        $source = \_PS_MODULE_DIR_ . $this->moduleName . '/views/images/' . $image_name;
+        $source = \_PS_MODULE_DIR_ . $this->moduleName . '/views/img/' . $image_name;
         $destination = \_PS_ROOT_DIR_ . '/img/os/' . (int)$order_state->id . '.png';
         \copy($source, $destination);
+    }
+
+    public function uninstall(): bool
+    {
+        $order_states = [
+            Constants::ORDER_STATE_NEW => new OrderState($this->configuration->get(Constants::ORDER_STATE_NEW)),
+            Constants::ORDER_STATE_PENDING_CONFIRMATION => new OrderState($this->configuration->get(Constants::ORDER_STATE_PENDING_CONFIRMATION)),
+            Constants::ORDER_STATE_PAID => new OrderState($this->configuration->get(Constants::ORDER_STATE_PAID)),
+            Constants::ORDER_STATE_OVERPAID => new OrderState($this->configuration->get(Constants::ORDER_STATE_OVERPAID)),
+            Constants::ORDER_STATE_UNDERPAID => new OrderState($this->configuration->get(Constants::ORDER_STATE_UNDERPAID)),
+            Constants::ORDER_STATE_EXPIRED => new OrderState($this->configuration->get(Constants::ORDER_STATE_EXPIRED)),
+            Constants::ORDER_STATE_CANCELLED => new OrderState($this->configuration->get(Constants::ORDER_STATE_CANCELLED)),
+            Constants::ORDER_STATE_IN_FLIGHT => new OrderState($this->configuration->get(Constants::ORDER_STATE_IN_FLIGHT)),
+        ];
+
+        foreach ($order_states as $id => $os) {
+            if (!$os->delete()) {
+                \PrestaShopLogger::addLog('Could not delete order state: ' . $os->id, 3);
+                return false;
+            }
+            if (!$this->configuration->remove($id)) {
+                \PrestaShopLogger::addLog('Could not delete order state config value: ' . $id, 3);
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -85,15 +85,14 @@ class Nodeless extends PaymentModule
     {
         $dropTable = "DROP TABLE IF EXISTS " . _DB_PREFIX_ . "nodeless_payment";
 
-        // todo: uninstall order states needed?
-
         return parent::uninstall() &&
             \Db::getInstance()->execute($dropTable) &&
             Configuration::deleteByName(Constants::LIVE_MODE) &&
             Configuration::deleteByName(Constants::STORE_ID) &&
             Configuration::deleteByName(Constants::API_KEY) &&
             Configuration::deleteByName(Constants::WEBHOOK_SECRET) &&
-            Configuration::deleteByName(Constants::WEBHOOK_ID);
+            Configuration::deleteByName(Constants::WEBHOOK_ID) &&
+            (new OrderStates($this->name))->uninstall();
     }
 
     /**

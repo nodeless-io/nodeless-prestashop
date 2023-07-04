@@ -44,31 +44,31 @@ class PaymentProcessor
             case Constants::INVOICE_STATUS_PENDING:
                 $message = 'Invoice payment received fully, waiting for settlement.';
                 $updateOrderStatus = true;
-                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_PENDING_CONFIRMATION);
+                $orderStatus = (int) $this->configuration->get(Constants::ORDER_STATE_PENDING_CONFIRMATION);
                 break;
 
             case Constants::INVOICE_STATUS_PAID:
                 $message = 'Invoice fully paid and settled.';
                 $updateOrderStatus = true;
-                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_PAID);
+                $orderStatus = (int) $this->configuration->get(Constants::ORDER_STATE_PAID);
                 break;
 
             case Constants::INVOICE_STATUS_UNDERPAID:
                 $message = 'Invoice is underpaid. Needs manual checking.';
                 $updateOrderStatus = true;
-                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_UNDERPAID);
+                $orderStatus = (int) $this->configuration->get(Constants::ORDER_STATE_UNDERPAID);
                 break;
 
             case Constants::INVOICE_STATUS_OVERPAID:
                 $message = 'Invoice is overpaid. Needs manual checking.';
                 $updateOrderStatus = true;
-                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_OVERPAID);
+                $orderStatus = (int) $this->configuration->get(Constants::ORDER_STATE_OVERPAID);
                 break;
 
             case Constants::INVOICE_STATUS_IN_FLIGHT:
                 $message = 'Invoice is in flight. Eventually needs manual checking if no paid status follows.';
                 $updateOrderStatus = true;
-                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_IN_FLIGHT);
+                $orderStatus = (int) $this->configuration->get(Constants::ORDER_STATE_IN_FLIGHT);
                 break;
 
             case Constants::INVOICE_STATUS_EXPIRED:
@@ -77,13 +77,13 @@ class PaymentProcessor
                 $message = 'Invoice expired.';
                 \PrestaShopLogger::addLog('Invoice expired, cart id: ' . $pm->getCartId(), 1);
                 $updateOrderStatus = false;
-                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_EXPIRED);
+                $orderStatus = (int) $this->configuration->get(Constants::ORDER_STATE_EXPIRED);
                 break;
 
             case Constants::INVOICE_STATUS_CANCELLED:
                 $message = 'Invoice was cancelled.';
                 $updateOrderStatus = true;
-                $orderStatus = $this->configuration->get(Constants::ORDER_STATE_CANCELLED);
+                $orderStatus = (int) $this->configuration->get(Constants::ORDER_STATE_CANCELLED);
                 break;
         }
 
