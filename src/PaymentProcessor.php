@@ -17,7 +17,6 @@ class PaymentProcessor
         $this->configuration = new \Configuration();
     }
 
-    // todo constructor logger etc
     public function checkInvoiceStatus(PaymentModel $pm): bool
     {
         // Get the invoice id and fetch latest data from nodeless.io
@@ -94,7 +93,7 @@ class PaymentProcessor
         // Create the order if not available, yet.
         $order = \Order::getByCartId($pm->getCartId());
         if (!$order && $updateOrderStatus) {
-            // Create an order from cart.
+            // Create an order from cart, will also update order status.
             $this->module->validateOrder(
                 $pm->getCartId(),
                 $orderStatus,
@@ -107,20 +106,8 @@ class PaymentProcessor
                 $customer->secure_key
             );
 
-            // Load the order as it exists now, update payment model.
-            $newOrder = \Order::getByCartId($pm->getCartId());
-            $pm->setOrderId($newOrder->id);
-            $pm->save();
-
-            // Add order history.
-            $orderHistory = new \OrderHistory();
-            $orderHistory->id_order = $newOrder->id;
-            $orderHistory->changeIdOrderState($orderStatus, $newOrder);
-            $orderHistory->message = $message;
-            $orderHistory->add();
-
-        } else { // Update existing order status.
-            if ($updateOrderStatus) {
+        } else { // Update existing order status, if order status changed.
+            if ($updateOrderStatus && $order->current_state != $orderStatus) {
                 // Add only order history and update status.
                 $orderHistory = new \OrderHistory();
                 $orderHistory->id_order = $order->id;

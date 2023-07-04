@@ -146,7 +146,7 @@ class NodelessApi
     {
         if (!empty($this->webhookSecret)) {
             $expectedHeader = hash_hmac('sha256', $requestData, $this->webhookSecret);
-            PrestaShopLogger::addLog(__FUNCTION__ . ' Expected header: ' . $expectedHeader);
+            #\PrestaShopLogger::addLog(__FUNCTION__ . ' Expected header: ' . $expectedHeader, 1);
 
             if ($expectedHeader === $signature) {
                 return true;

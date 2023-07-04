@@ -56,8 +56,9 @@ class NodelessWebhookModuleFrontController extends ModuleFrontController
         }
 
         $rawPostData = file_get_contents('php://input');
-        \PrestaShopLogger::addLog('Webhook data received: input: ' . print_r($rawPostData, true), 1);
-        \PrestaShopLogger::addLog('Webhook headers: ' . print_r(getallheaders(), true), 1);
+        // todo: add debug mode for informational logs.
+        #\PrestaShopLogger::addLog('Webhook data received: input: ' . print_r($rawPostData, true), 1);
+        #\PrestaShopLogger::addLog('Webhook headers: ' . print_r(getallheaders(), true), 1);
 
         if ($rawPostData) {
             // Validate webhook request.
@@ -69,11 +70,16 @@ class NodelessWebhookModuleFrontController extends ModuleFrontController
                 }
             }
 
-            if (!isset($signature) || $this->api->validWebhookRequest($signature, $rawPostData)) {
+            if (!isset($signature) || ! $this->api->validWebhookRequest($signature, $rawPostData)) {
                 $errValidation = 'Failed to validate signature of webhook request.';
                 \PrestaShopLogger::addLog($errValidation, 3);
-                throw new \RuntimeException($errValidation, $errValidation);
+                throw new \RuntimeException($errValidation);
             }
+        } else {
+            $errEmptyData = 'No post data found, aborting.';
+            // Do not log for DoS reasons. Log only in debug mode even if error.
+            #\PrestaShopLogger::addLog($errEmptyData, 3);
+            throw new \RuntimeException($errEmptyData);
         }
 
         $postData = json_decode($rawPostData, false, 512, JSON_THROW_ON_ERROR);
@@ -87,12 +93,12 @@ class NodelessWebhookModuleFrontController extends ModuleFrontController
         // Find the existing invoice and check the status if it has been paid.
         // todo: support multiple invoices; check all and if one is "paid" show the order is paid.
         $collection = (new \PrestaShopCollection(PaymentModel::class))
-            ->where('invoice_id', '=', (int) $postData->uuid)
+            ->where('invoice_id', '=', $postData->uuid)
             ->orderBy('created_at', 'desc');
 
         /** @var PaymentModel $pm */
         $pm = $collection->getFirst();
-        \PrestaShopLogger::addLog('Loaded pm cart id: ' . $pm->getCartId(), 1);
+        #\PrestaShopLogger::addLog('Loaded pm cart id: ' . $pm->getCartId(), 1);
 
         // Update order status.
         if (!$this->processor->checkInvoiceStatus($pm)) {
