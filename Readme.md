@@ -28,7 +28,7 @@ Note: You can also give it a testrun first by <a href="https://testnet.nodeless.
 ## Installation
 
 ### Upload and install
-- On our [GitHub releases page](https://github.com/nodeless-io/prestashop/releases)
+- On our [GitHub releases page](https://github.com/nodeless-io/nodeless-prestashop/releases)
 - Download the "nodeless.zip" archive of the latest release
 - In Prestashop: Modules -> Module Manager click on "Upload a module"
 - Scroll to the Nodeless module and click "Configure"
