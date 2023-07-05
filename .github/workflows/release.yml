@@ -22,7 +22,7 @@ jobs:
         with:
           type: 'zip'
           filename: 'nodeless.zip'
-          exclusions: '*.git* *.github* composer.* README.md'
+          exclusions: '*.git* *.github* composer.* README.md output.log DOCKER_ENV docker_tag Dockerfile-php-build'
       - name: Upload artifact to release page.
         uses: ncipollo/release-action@v1
         with:
