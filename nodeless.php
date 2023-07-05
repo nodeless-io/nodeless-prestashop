@@ -77,7 +77,6 @@ class Nodeless extends PaymentModule
             $this->registerHook('displayHeader') &&
             $this->registerHook('displayBackOfficeHeader') &&
             $this->registerHook('paymentOptions') &&
-            $this->registerHook('displayPaymentReturn') &&
             (new OrderStates($this->name))->install();
     }
 
@@ -245,7 +244,7 @@ class Nodeless extends PaymentModule
     public function hookDisplayBackOfficeHeader()
     {
         if (Tools::getValue('configure') == $this->name) {
-            $this->context->controller->addJS($this->_path . 'views/js/back.js');
+            #$this->context->controller->addJS($this->_path . 'views/js/back.js');
             $this->context->controller->addCSS($this->_path . 'views/css/back.css');
         }
     }
@@ -255,7 +254,7 @@ class Nodeless extends PaymentModule
      */
     public function hookDisplayHeader()
     {
-        $this->context->controller->addJS($this->_path . '/views/js/front.js');
+        #$this->context->controller->addJS($this->_path . '/views/js/front.js');
         $this->context->controller->addCSS($this->_path . '/views/css/front.css');
     }
 
@@ -295,11 +294,6 @@ class Nodeless extends PaymentModule
             }
         }
         return false;
-    }
-
-    public function hookDisplayPaymentReturn()
-    {
-        return "test hookDisplayPaymentReturn";
     }
 
 }

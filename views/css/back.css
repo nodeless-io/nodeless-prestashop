@@ -32,6 +32,11 @@
 	border-top-left-radius: 0;
 }
 
+.nodeless-top-info {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
 .nodeless-header .text-branded,
 .nodeless-content .text-branded {
 	color: #00aff0;
