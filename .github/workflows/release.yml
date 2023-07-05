@@ -11,13 +11,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Install Composer dependencies
-        uses: php-actions/composer@v6
         with:
-          dev: no
-          php_version: 8.0
-          php_extensions: bcmath
-
+          path: nodeless
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          tools: composer:v2
+          extensions: bcmath
+      - name: Install Composer dependencies
+        run: |
+          cd nodeless
+          composer install --no-progress --prefer-dist --optimize-autoloader
       - name: Create release artifact.
         uses: thedoctor0/zip-release@master
         with:
