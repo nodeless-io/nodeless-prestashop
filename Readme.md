@@ -3,8 +3,8 @@
 ## Requirements
 
 - PrestaShop version 8.0 or 1.7 (currently untested)
-- PHP >=7.4
-- cURL PHP extension
+- PHP >=8.0
+- PHP cURL extension
 
 ## Preparation
 
